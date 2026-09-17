@@ -23,7 +23,7 @@ suite('JSON Explorer extension migration', () => {
   const settings = ['pythonRepr.autoConvert', 'lineBreakRepair.autoConvert'];
   const original = new Map<string, boolean | undefined>();
   suiteSetup(async () => {
-    await vscode.extensions.getExtension('zekeChin.context-kit')!.activate();
+    await vscode.extensions.getExtension('zekeChin.context-kit-tools')!.activate();
     for (const key of settings) {
       const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
       original.set(key, config.inspect<boolean>(key)?.globalValue);

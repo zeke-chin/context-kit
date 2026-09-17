@@ -1,6 +1,6 @@
 {
-  "name": "context-kit",
-  "displayName": "Context Kit",
+  "name": "context-kit-tools",
+  "displayName": "Context Kit Tools",
   "version": "0.1.0",
   "description": "整理结构化内容，复制精准上下文。",
   "categories": [
@@ -12,8 +12,16 @@
     "context",
     "json"
   ],
+  "homepage": "https://github.com/zeke-chin/context-kit#readme",
+  "bugs": {
+    "url": "https://github.com/zeke-chin/context-kit/issues"
+  },
   "license": "MIT",
   "author": "zeke-chin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zeke-chin/context-kit.git"
+  },
   "publisher": "zekeChin",
   "main": "./out/extension.js",
   "scripts": {
@@ -25,7 +33,7 @@
     "format:check": "oxfmt --check .",
     "test": "bun test ./tests/unit",
     "check": "bun run typecheck && bun run lint && bun run format:check && bun run test",
-    "package": "bun run compile && vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
+    "package": "bun run compile && vsce package --no-dependencies",
     "test:integration": "bun run compile && bun scripts/build-integration.mts && node scripts/test-integration.cjs"
   },
   "dependencies": {
@@ -39,6 +47,7 @@
     "@vscode/test-electron": "3.1.0",
     "@vscode/vsce": "4.0.0",
     "mocha": "12.0.1",
+    "ovsx": "1.2.0",
     "oxfmt": "0.68.0",
     "oxlint": "1.83.0",
     "typescript": "7.0.2"
@@ -153,6 +162,7 @@
   "extensionKind": [
     "workspace"
   ],
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.105.0"
   },

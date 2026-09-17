@@ -10,7 +10,7 @@ suite('JSON Explorer and Copy Anchor together', () => {
   let clipboard: string;
   let originalMode: boolean | undefined;
   suiteSetup(async () => {
-    await vscode.extensions.getExtension('zekeChin.context-kit')!.activate();
+    await vscode.extensions.getExtension('zekeChin.context-kit-tools')!.activate();
     folder = await mkdtemp(join(tmpdir(), 'context-kit-combined-'));
     clipboard = await vscode.env.clipboard.readText();
     const config = vscode.workspace.getConfiguration('contextKit.copyAnchor');

@@ -18,7 +18,8 @@
 | 内容            | 约定                      |
 | --------------- | ------------------------- |
 | 展示名称        | Context Kit               |
-| 包名与仓库名    | context-kit               |
+| 包名            | context-kit-tools         |
+| 仓库名          | context-kit               |
 | JSON 命令及配置 | contextKit.jsonExplorer.* |
 | 复制命令及配置  | contextKit.copyAnchor.*   |
 
@@ -67,4 +68,4 @@ VSIX 包含 `out/extension.js` 与第三方许可，不包含源码、测试、s
 
 两个模块的 `enabled` 都是整个功能的总开关，默认 true，动态生效。JSON Explorer 关闭时停止文档事件处理、转换命令并释放 provider；重新启用时重新注册。Copy Anchor 关闭时停用命令和快捷键、隐藏状态栏、取消提示定时器并清除快照。模式单独保存在 `contextKit.copyAnchor.contextMode`，关闭总开关不重置模式或现有剪贴板。
 
-配置与使用说明统一维护在各功能 README，docs 下的旧入口仅保留导航。当前无远端仓库，VSIX 保留相对文档链接并包含功能 README 和演示图片；发布到 Marketplace 前应配置真实 repository 地址并启用链接重写。
+配置与使用说明统一维护在各功能 README，docs 下的旧入口仅保留导航。仓库为 `zeke-chin/context-kit`；打包时重写相对链接，VSIX 包含功能 README 和演示图片，排除本地环境变量文件。

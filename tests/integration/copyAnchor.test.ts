@@ -18,7 +18,7 @@ async function runCopyAnchorRegression(): Promise<void> {
     assertions++;
   };
   try {
-    await vscode.extensions.getExtension('zekeChin.context-kit')!.activate();
+    await vscode.extensions.getExtension('zekeChin.context-kit-tools')!.activate();
     // Isolate this regression from editor groups left open by the JSON side-panel tests.
     await vscode.commands.executeCommand('workbench.action.joinAllGroups');
     await config.update('contextMode', true, vscode.ConfigurationTarget.Global);

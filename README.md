@@ -45,7 +45,7 @@
 
 先禁用旧扩展，再启用 Context Kit，避免两份粘贴监听器、Hover 和 CodeLens 同时运行。旧项目的命令前缀 `better-json-explorer.` 改为 `contextKit.jsonExplorer.`；设置前缀 `betterJsonExplorer.` 同样改为 `contextKit.jsonExplorer.`。
 
-默认快捷键保持不变。自定义快捷键与已有设置需要手动修改前缀；本项目不会自动写入旧设置。当前扩展 ID 为 `zekeChin.context-kit`，不是旧扩展的自动升级包。
+默认快捷键保持不变。自定义快捷键与已有设置需要手动修改前缀；本项目不会自动写入旧设置。当前扩展 ID 为 `zekeChin.context-kit-tools`，不是旧扩展的自动升级包。
 
 ## 项目结构
 
@@ -90,7 +90,7 @@ bun run package
 
 Bun 将 `jsonc-parser` 一起打入 `out/extension.js`，仅将 `vscode` 留给宿主提供；插件运行不需要安装 Bun。TS7 检查源代码和测试，测试配置单独跳过第三方声明文件检查。
 
-生成的 `context-kit-0.1.0.vsix` 可在扩展面板选择「从 VSIX 安装」。当前未发布 Marketplace，未创建远端仓库。架构说明见 `docs/architecture.md`。
+生成的 `context-kit-tools-0.1.0.vsix` 可在扩展面板选择「从 VSIX 安装」。项目仓库：[zeke-chin/context-kit](https://github.com/zeke-chin/context-kit)。架构说明见 `docs/architecture.md`。
 
 ## License
 

@@ -21,3 +21,6 @@ tsconfig.tests.json
 
 CLAUDE.md
 AGENTS.md
+
+.env
+.env.*
