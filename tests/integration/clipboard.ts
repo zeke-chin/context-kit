@@ -27,5 +27,9 @@ export async function focusClipboardEditor(): Promise<void> {
   }
   await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
   await new Promise((resolve) => setTimeout(resolve, 150));
-  console.log('Native clipboard window focused:', vscode.window.state.focused);
+  if (process.env.CI && process.platform === 'linux') {
+    // Chromium's DOM copy requires a trusted input event. F18 has no default binding
+    // and activates the window without changing text, selection, or clipboard.
+    execFileSync('xdotool', ['key', '--clearmodifiers', 'F18']);
+  }
 }
