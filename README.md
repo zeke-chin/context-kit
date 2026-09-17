@@ -2,7 +2,7 @@
 
 整理结构化内容，复制精准上下文。
 
-JSON Explorer 已迁入，提供原 Better JSON Explorer 的 JSON 处理与预览能力。Copy Anchor 当前仍为预留模块，尚未启用上下文复制。
+整合 JSON Explorer 的结构化内容处理与 Copy Anchor 的上下文复制能力。
 
 ## JSON Explorer
 
@@ -29,6 +29,26 @@ JSON Explorer 已迁入，提供原 Better JSON Explorer 的 JSON 处理与预�
 
 完整用法、演示 GIF、Python 支持范围及示例见源码中的 `docs/json-explorer.md`。
 
+## Copy Anchor
+
+- 在已保存文件中选中内容后按 **Ctrl+C**（macOS：**Cmd+C**），复制绝对路径、真实行号和原文。首尾空行会去掉并同步调整行号。
+- 全选整个文件时仅复制绝对路径；Untitled、虚拟文档和无选区场景保留原生复制行为。
+- 双按 **Ctrl+\**，或点击右下角 **📌 / 📄**，切换上下文复制与普通复制。
+- 切换时会在上次通过插件复制的原文与上下文之间更新剪贴板，取消或移动选区后仍可切换。外部复制已覆盖剪贴板时，使用当前非空选区；没有选区则不改写剪贴板。
+- 左侧临时显示 `📌copied: …` / `📄copied: …`；预览会缩短路径、显示字面换行并保留文件扩展名，不修改真正的剪贴板内容。
+
+| 配置                                     | 默认值 | 含义                           |
+| ---------------------------------------- | ------ | ------------------------------ |
+| `contextKit.copyAnchor.enabled`          | `true` | 启用上下文复制，切换后持久保存 |
+| `contextKit.copyAnchor.previewMaxLength` | `30`   | 最大预览字符数，不含提示前缀   |
+| `contextKit.copyAnchor.previewDuration`  | `1`    | 提示秒数；`0` 关闭提示         |
+
+命令：`contextKit.copyAnchor.copy`、`contextKit.copyAnchor.toggle`。仅编辑器选区的复制快捷键受影响，右键菜单和菜单栏的原生复制保持普通复制。手动修改 enabled 设置只改变模式，不触发重新复制。
+
+双按 Ctrl+\ 会占用默认拆分编辑器快捷键的前缀，可在键盘快捷方式中搜索 `contextKit.copyAnchor.toggle` 修改。完整示例和行为边界见源码中的 `docs/copy-anchor.md`。
+
+从独立 Copy Anchor 迁移时请先禁用旧扩展；将旧命令和设置前缀 `copyAnchor.` 改为 `contextKit.copyAnchor.`。既有设置不会被自动改写。
+
 ## 从 Better JSON Explorer 迁移
 
 先禁用旧扩展，再启用 Context Kit，避免两份粘贴监听器、Hover 和 CodeLens 同时运行。旧项目的命令前缀 `better-json-explorer.` 改为 `contextKit.jsonExplorer.`；设置前缀 `betterJsonExplorer.` 同样改为 `contextKit.jsonExplorer.`。
@@ -47,10 +67,10 @@ context-kit/
 │   │   │   ├── providers/     # Hover、CodeLens
 │   │   │   ├── index.ts       # 注册与生命周期
 │   │   │   └── ...            # 命令、配置与编辑器适配
-│   │   └── copy-anchor/       # 待迁移
+│   │   └── copy-anchor/       # 上下文复制、快照和状态栏预览
 │   └── shared/               # 共用日志
 ├── tests/
-│   ├── unit/json-explorer/   # Bun 回归测试
+│   ├── unit/                 # JSON Explorer 与 Copy Anchor 回归测试
 │   └── integration/          # VS Code 扩展宿主测试
 ├── scripts/                  # 测试构建与启动
 ├── docs/                     # 架构与功能文档

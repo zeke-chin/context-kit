@@ -60,6 +60,14 @@
       {
         "command": "contextKit.jsonExplorer.convertToJsonInPlace",
         "title": "Context Kit: JSON Explorer: Convert active document to JSON (Python dict or line-break repair)"
+      },
+      {
+        "command": "contextKit.copyAnchor.toggle",
+        "title": "Context Kit: Copy Anchor: 切换上下文复制"
+      },
+      {
+        "command": "contextKit.copyAnchor.copy",
+        "title": "Context Kit: Copy Anchor: 按当前模式复制"
       }
     ],
     "keybindings": [
@@ -68,10 +76,21 @@
         "key": "ctrl+;",
         "mac": "cmd+;",
         "when": "editorTextFocus && (editorLangId == json || editorLangId == jsonc || editorLangId == plaintext)"
+      },
+      {
+        "command": "contextKit.copyAnchor.copy",
+        "key": "ctrl+c",
+        "mac": "cmd+c",
+        "when": "editorTextFocus && editorHasSelection"
+      },
+      {
+        "command": "contextKit.copyAnchor.toggle",
+        "key": "ctrl+\\ ctrl+\\",
+        "when": "editorTextFocus"
       }
     ],
     "configuration": {
-      "title": "Context Kit: JSON Explorer",
+      "title": "Context Kit",
       "properties": {
         "contextKit.jsonExplorer.pythonRepr.autoConvert": {
           "type": "boolean",
@@ -82,6 +101,28 @@
           "type": "boolean",
           "default": false,
           "description": "粘贴包含字符串内真换行（如从终端复制的 JSON）时是否直接修复并转换为 JSON。默认 false：在顶部显示 ▸ Convert 按钮，点击后才转换。设为 true 时粘贴即转换，且不再显示按钮。"
+        },
+        "contextKit.copyAnchor.previewMaxLength": {
+          "type": "integer",
+          "default": 30,
+          "minimum": 1,
+          "maximum": 1000,
+          "scope": "window",
+          "description": "左侧复制提示的最大预览字符数（不含 📌copied: / 📄copied: 前缀，含截断标记）。路径过长时优先保留文件名尾部和扩展名。换行显示为 \\n。"
+        },
+        "contextKit.copyAnchor.previewDuration": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 3600,
+          "scope": "window",
+          "description": "左侧复制提示的显示时间，单位为秒；设为 0 不显示。再次复制或切换会重新计时。"
+        },
+        "contextKit.copyAnchor.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "开启时，编辑器内选中复制会附带路径与行号。快捷键和状态栏按钮修改此设置，并保留当前设置作用域。"
         }
       }
     }
@@ -89,7 +130,8 @@
   "activationEvents": [
     "onLanguage:json",
     "onLanguage:jsonc",
-    "onLanguage:plaintext"
+    "onLanguage:plaintext",
+    "onStartupFinished"
   ],
   "extensionKind": [
     "workspace"

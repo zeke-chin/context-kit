@@ -7,4 +7,6 @@
 - 命令与设置统一使用 `contextKit.jsonExplorer.*`，默认 Ctrl+; / Cmd+; 保持不变。
 - 分离纯逻辑与 VS Code 适配，迁入原有回归测试并增加扩展宿主验证。
 - 使用 Bun bundle 将 jsonc-parser 打入 VSIX，补全 provider 生命周期清理。
-- Copy Anchor 保留为待迁移模块。
+- 迁入当前 Copy Anchor：路径/行号复制、全选路径、模式切换后重新复制、剪贴板快照保护和可配置状态栏预览。
+- Copy Anchor 命令与设置使用 `contextKit.copyAnchor.*`，保留 Ctrl+C / Cmd+C 和双按 Ctrl+\。
+- 增加 Copy Anchor 回归测试和两个模块的联合集成测试。

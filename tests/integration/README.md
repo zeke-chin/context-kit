@@ -6,6 +6,8 @@
 
 - `convertCodeLens.test.ts`：原项目全部 CodeLens 回归测试。
 - `extension.test.ts`：命令注册、切换/撤销、自动格式化、输入修复、新配置、缓存失效、CodeLens 打开和 Hover token 完整内容。
+- `copyAnchor.test.ts`：当前独立 Copy Anchor 的完整剪贴板回归断言，覆盖切换快照和选区变化。
+- `combinedFeatures.test.ts`：两个模块共同启用时的复制、转换、粘贴和 Untitled 行为。
 - `index.ts`：Mocha 入口。
 
 扩展和测试通过 Bun 分别 bundle，测试独立加载真实 VS Code API。测试会修改隔离配置并在结束时还原。
