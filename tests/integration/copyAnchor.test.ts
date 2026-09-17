@@ -1,3 +1,4 @@
+import { assertClipboard } from './clipboard';
 import { suite, test } from 'mocha';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -99,7 +100,7 @@ async function runCopyAnchorRegression(): Promise<void> {
     editor.selection = new vscode.Selection(2, 2, 2, 2);
     equal(contextForEditor(editor), undefined);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
-    equal(await vscode.env.clipboard.readText(), '  alpha\n');
+    await assertClipboard('  alpha\n');
 
     const untitled = await vscode.workspace.openTextDocument({ content: 'Untitled text\n' });
     const unsaved = await vscode.window.showTextDocument(untitled);
@@ -107,7 +108,7 @@ async function runCopyAnchorRegression(): Promise<void> {
     unsaved.selection = new vscode.Selection(0, 0, 1, 0);
     equal(contextForEditor(unsaved), undefined);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
-    equal(await vscode.env.clipboard.readText(), 'Untitled text\n');
+    await assertClipboard('Untitled text\n');
     await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
 
     // Full selection in a file without a trailing newline.

@@ -1,3 +1,4 @@
+import { assertClipboard } from './clipboard';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -86,6 +87,6 @@ suite('JSON Explorer and Copy Anchor together', () => {
     const end = editor.document.lineAt(editor.document.lineCount - 1).range.end;
     editor.selection = new vscode.Selection(new vscode.Position(0, 0), end);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
-    assert.equal(await vscode.env.clipboard.readText(), content);
+    await assertClipboard(content);
   });
 });
