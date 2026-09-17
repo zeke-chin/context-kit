@@ -11,7 +11,7 @@ async function runCopyAnchorRegression(): Promise<void> {
   const path = join(folder, 'example.md');
   const originalClipboard = await vscode.env.clipboard.readText();
   const config = vscode.workspace.getConfiguration('contextKit.copyAnchor');
-  const originalEnabled = config.inspect<boolean>('enabled')?.globalValue;
+  const originalEnabled = config.inspect<boolean>('contextMode')?.globalValue;
   let assertions = 0;
   const equal = (actual: unknown, expected: unknown): void => {
     assert.deepEqual(actual, expected);
@@ -19,7 +19,9 @@ async function runCopyAnchorRegression(): Promise<void> {
   };
   try {
     await vscode.extensions.getExtension('zekeChin.context-kit')!.activate();
-    await config.update('enabled', true, vscode.ConfigurationTarget.Global);
+    // Isolate this regression from editor groups left open by the JSON side-panel tests.
+    await vscode.commands.executeCommand('workbench.action.joinAllGroups');
+    await config.update('contextMode', true, vscode.ConfigurationTarget.Global);
     await writeFile(path, 'before\n\n  alpha\n\n  beta\n\nafter\n');
     const document = await vscode.workspace.openTextDocument(path);
     const editor = await vscode.window.showTextDocument(document);
@@ -49,16 +51,16 @@ async function runCopyAnchorRegression(): Promise<void> {
     editor.selection = new vscode.Selection(2, 2, 2, 7);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
     await vscode.commands.executeCommand('contextKit.copyAnchor.toggle');
-    equal(vscode.workspace.getConfiguration('contextKit.copyAnchor').get('enabled'), false);
+    equal(vscode.workspace.getConfiguration('contextKit.copyAnchor').get('contextMode'), false);
     equal(await vscode.env.clipboard.readText(), 'alpha');
     await vscode.commands.executeCommand('contextKit.copyAnchor.toggle');
-    equal(vscode.workspace.getConfiguration('contextKit.copyAnchor').get('enabled'), true);
+    equal(vscode.workspace.getConfiguration('contextKit.copyAnchor').get('contextMode'), true);
     equal(await vscode.env.clipboard.readText(), `\`\`\`${path}:3\nalpha\n\`\`\``);
     await Promise.all([
       vscode.commands.executeCommand('contextKit.copyAnchor.toggle'),
       vscode.commands.executeCommand('contextKit.copyAnchor.toggle'),
     ]);
-    equal(vscode.workspace.getConfiguration('contextKit.copyAnchor').get('enabled'), true);
+    equal(vscode.workspace.getConfiguration('contextKit.copyAnchor').get('contextMode'), true);
     equal(await vscode.env.clipboard.readText(), `\`\`\`${path}:3\nalpha\n\`\`\``);
 
     // Keep switching the copied snippet after the selection is cleared or moved.
@@ -80,7 +82,7 @@ async function runCopyAnchorRegression(): Promise<void> {
     // Capture a fresh selection before the asynchronous settings write.
     editor.selection = new vscode.Selection(2, 2, 2, 7);
     const selectionChange = vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration('contextKit.copyAnchor.enabled')) {
+      if (event.affectsConfiguration('contextKit.copyAnchor.contextMode')) {
         editor.selection = new vscode.Selection(1, 0, 1, 0);
       }
     });
@@ -124,7 +126,7 @@ async function runCopyAnchorRegression(): Promise<void> {
     equal(await vscode.env.clipboard.readText(), singlePath);
     console.log(`Copy Anchor integration: ${assertions} assertions passed.`);
   } finally {
-    await config.update('enabled', originalEnabled, vscode.ConfigurationTarget.Global);
+    await config.update('contextMode', originalEnabled, vscode.ConfigurationTarget.Global);
     await vscode.env.clipboard.writeText(originalClipboard);
     await rm(folder, { recursive: true, force: true });
   }

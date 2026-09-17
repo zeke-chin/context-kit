@@ -6,6 +6,7 @@ export async function run(): Promise<void> {
   require('./extension.test');
   require('./copyAnchor.test');
   require('./combinedFeatures.test');
+  require('./featureSwitches.test');
   await new Promise<void>((resolve, reject) => {
     mocha.run((failures) =>
       failures ? reject(new Error(`${failures} integration tests failed`)) : resolve(),

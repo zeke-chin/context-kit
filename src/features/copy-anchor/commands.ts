@@ -1,3 +1,4 @@
+import { isCopyAnchorEnabled } from './config';
 import * as vscode from 'vscode';
 import { formatContext } from './core/contextText';
 
@@ -34,10 +35,10 @@ export async function copyAfterToggle(
   if (previous && (await vscode.env.clipboard.readText()) === previous.written) {
     content = previous.content;
   }
-  if (!content) return;
+  if (!isCopyAnchorEnabled() || !content) return;
   const enabled = vscode.workspace
     .getConfiguration('contextKit.copyAnchor')
-    .get<boolean>('enabled', true);
+    .get<boolean>('contextMode', true);
   const written = enabled ? content.context : content.plain;
   await vscode.env.clipboard.writeText(written);
   lastCopy = { content, written };
@@ -75,12 +76,13 @@ export function contextForEditor(editor: vscode.TextEditor): string | undefined 
   );
 }
 
-export async function copyWithCurrentMode(): Promise<CopyResult> {
+export async function copyWithCurrentMode(): Promise<CopyResult | undefined> {
+  if (!isCopyAnchorEnabled()) return;
   const content = captureSelection();
   const editor = vscode.window.activeTextEditor;
   const enabled = vscode.workspace
     .getConfiguration('contextKit.copyAnchor')
-    .get<boolean>('enabled', true);
+    .get<boolean>('contextMode', true);
   const text = enabled && editor ? contextForEditor(editor) : undefined;
   if (text === undefined) {
     await vscode.commands.executeCommand(NATIVE_COPY);

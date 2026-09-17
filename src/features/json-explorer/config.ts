@@ -21,3 +21,7 @@ export function readAutoConvertConfig(): AutoConvertConfig {
     autoConvertLineBreak: config.get<boolean>(CONFIG_KEY_LINE_BREAK_AUTO, false),
   };
 }
+
+export function isJsonExplorerEnabled(): boolean {
+  return vscode.workspace.getConfiguration(CONFIG_SECTION).get<boolean>('enabled', true);
+}

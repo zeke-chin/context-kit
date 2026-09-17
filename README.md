@@ -4,50 +4,42 @@
 
 整合 JSON Explorer 的结构化内容处理与 Copy Anchor 的上下文复制能力。
 
-## JSON Explorer
+## 功能与配置
 
-- 在 plaintext 中粘贴完整 JSON 或 JSON 字符串，自动识别、切换为 JSON 并格式化。
-- **Ctrl+;**（macOS：**Cmd+;**）切换 JSON 与 JSON 字符串。
-- Python repr 或字符串内含真实换行的 JSON，默认显示转换 CodeLens；点击或使用上述快捷键修复并转换。
-- JSON/JSONC 字符串值支持 Hover：嵌套 JSON、Python dict、Markdown 和纯文本分别预览。
-- Hover 链接与 CodeLens 可在侧栏打开完整内容，支持多次打开与递归解析。超长 Hover 截断预览，侧栏内容保持完整。
+| 功能          | 用途                                         | 完整用法、字段说明与 JSON 示例                                 |
+| ------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| JSON Explorer | JSON 识别、转换、输入修复、Hover 与 CodeLens | [JSON Explorer 配置文档](src/features/json-explorer/README.md) |
+| Copy Anchor   | 路径/行号复制、模式切换、复制预览            | [Copy Anchor 配置文档](src/features/copy-anchor/README.md)     |
 
-配置项默认均为 `false`，修改后即时生效：
+两个模块都有独立的 `enabled` **总开关**，默认开启，修改后即时生效。Copy Anchor 的 `contextMode` 单独控制上下文/普通复制模式。
 
-| 配置                                                  | 开启后的行为                |
-| ----------------------------------------------------- | --------------------------- |
-| `contextKit.jsonExplorer.pythonRepr.autoConvert`      | 粘贴 Python repr 时自动转换 |
-| `contextKit.jsonExplorer.lineBreakRepair.autoConvert` | 粘贴时自动修复字符串内换行  |
+配置写入用户 `settings.json` 或项目 `.vscode/settings.json`；工作区设置优先。完整默认配置如下，可合并到现有设置对象：
 
-粘贴自动识别沿用原项目的文档整体替换检测，并非系统剪贴板监听。JSONC 可用于结构预览；JSON ⇄ 字符串切换要求内容可按严格 JSON 解析。
+```json
+{
+  "contextKit.jsonExplorer.enabled": true,
+  "contextKit.jsonExplorer.pythonRepr.autoConvert": false,
+  "contextKit.jsonExplorer.lineBreakRepair.autoConvert": false,
+  "contextKit.copyAnchor.enabled": true,
+  "contextKit.copyAnchor.contextMode": true,
+  "contextKit.copyAnchor.previewMaxLength": 30,
+  "contextKit.copyAnchor.previewDuration": 1
+}
+```
 
-命令面板搜索 **Context Kit: JSON Explorer**。对应命令 ID：
+早期版本 Copy Anchor 的 `enabled` 表示复制模式；现在应使用 `contextMode` 保存模式，`enabled` 控制整个功能。既有设置不会自动改写。
 
-- `contextKit.jsonExplorer.toggleCurrentDocument`
-- `contextKit.jsonExplorer.convertToJsonInPlace`
-- `contextKit.jsonExplorer.parseNestedJson`（由 CodeLens 传入内容）
+## 快捷键配置
 
-完整用法、演示 GIF、Python 支持范围及示例见源码中的 `docs/json-explorer.md`。
+快捷键写在用户 **`keybindings.json`**（顶层数组），功能开关和其他设置写在 **`settings.json`**（顶层对象），两者分开配置。
 
-## Copy Anchor
+| 功能           | Windows / Linux | macOS                | 默认键位、改键方法与完整 JSON                                       |
+| -------------- | --------------- | -------------------- | ------------------------------------------------------------------- |
+| JSON 转换      | Ctrl+;          | Cmd+;                | [JSON Explorer 快捷键](src/features/json-explorer/README.md#快捷键) |
+| 按当前模式复制 | Ctrl+C          | Cmd+C                | [Copy Anchor 快捷键](src/features/copy-anchor/README.md#快捷键)     |
+| 切换复制模式   | Ctrl+\，Ctrl+\  | Control+\，Control+\ | [Copy Anchor 改键示例](src/features/copy-anchor/README.md#快捷键)   |
 
-- 在已保存文件中选中内容后按 **Ctrl+C**（macOS：**Cmd+C**），复制绝对路径、真实行号和原文。首尾空行会去掉并同步调整行号。
-- 全选整个文件时仅复制绝对路径；Untitled、虚拟文档和无选区场景保留原生复制行为。
-- 双按 **Ctrl+\**，或点击右下角 **📌 / 📄**，切换上下文复制与普通复制。
-- 切换时会在上次通过插件复制的原文与上下文之间更新剪贴板，取消或移动选区后仍可切换。外部复制已覆盖剪贴板时，使用当前非空选区；没有选区则不改写剪贴板。
-- 左侧临时显示 `📌copied: …` / `📄copied: …`；预览会缩短路径、显示字面换行并保留文件扩展名，不修改真正的剪贴板内容。
-
-| 配置                                     | 默认值 | 含义                           |
-| ---------------------------------------- | ------ | ------------------------------ |
-| `contextKit.copyAnchor.enabled`          | `true` | 启用上下文复制，切换后持久保存 |
-| `contextKit.copyAnchor.previewMaxLength` | `30`   | 最大预览字符数，不含提示前缀   |
-| `contextKit.copyAnchor.previewDuration`  | `1`    | 提示秒数；`0` 关闭提示         |
-
-命令：`contextKit.copyAnchor.copy`、`contextKit.copyAnchor.toggle`。仅编辑器选区的复制快捷键受影响，右键菜单和菜单栏的原生复制保持普通复制。手动修改 enabled 设置只改变模式，不触发重新复制。
-
-双按 Ctrl+\ 会占用默认拆分编辑器快捷键的前缀，可在键盘快捷方式中搜索 `contextKit.copyAnchor.toggle` 修改。完整示例和行为边界见源码中的 `docs/copy-anchor.md`。
-
-从独立 Copy Anchor 迁移时请先禁用旧扩展；将旧命令和设置前缀 `copyAnchor.` 改为 `contextKit.copyAnchor.`。既有设置不会被自动改写。
+示例保留各功能的 `enabled` 条件，总开关关闭时不会接管对应按键。模式切换键只改变 `contextMode`，不能启用已关闭的整个功能。
 
 ## 从 Better JSON Explorer 迁移
 
@@ -82,7 +74,7 @@ context-kit/
 
 ## 开发
 
-Bun 1.4.2、TypeScript 7.0.2、Oxlint、Oxfmt。Node.js 22+ 用于打包和扩展宿主测试工具；所有依赖与脚本通过 Bun 管理。
+Bun 1.4.2、TypeScript 7.0.2、Oxlint、Oxfmt。Node.js 22.12+ 用于打包和扩展宿主测试工具；所有依赖与脚本通过 Bun 管理。
 
 ```sh
 bun install --frozen-lockfile

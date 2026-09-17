@@ -25,7 +25,7 @@
     "format:check": "oxfmt --check .",
     "test": "bun test ./tests/unit",
     "check": "bun run typecheck && bun run lint && bun run format:check && bun run test",
-    "package": "bun run compile && vsce package --no-dependencies --allow-missing-repository",
+    "package": "bun run compile && vsce package --no-dependencies --allow-missing-repository --no-rewrite-relative-links",
     "test:integration": "bun run compile && bun scripts/build-integration.mts && node scripts/test-integration.cjs"
   },
   "dependencies": {
@@ -33,12 +33,12 @@
   },
   "devDependencies": {
     "@types/bun": "1.4.2",
-    "@types/mocha": "^10.0.10",
+    "@types/mocha": "10.0.10",
     "@types/node": "22.20.3",
     "@types/vscode": "1.105.0",
-    "@vscode/test-electron": "^2.5.2",
-    "@vscode/vsce": "3.9.2",
-    "mocha": "^11.0.0",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.0.0",
+    "mocha": "12.0.1",
     "oxfmt": "0.68.0",
     "oxlint": "1.83.0",
     "typescript": "7.0.2"
@@ -51,23 +51,28 @@
       },
       {
         "command": "contextKit.jsonExplorer.toggleCurrentDocument",
-        "title": "Context Kit: JSON Explorer: Toggle Current Document JSON Format/String"
+        "title": "Context Kit: JSON Explorer: Toggle Current Document JSON Format/String",
+        "enablement": "config.contextKit.jsonExplorer.enabled"
       },
       {
         "command": "contextKit.jsonExplorer.parseNestedJson",
-        "title": "Context Kit: JSON Explorer: Parse Nested JSON String"
+        "title": "Context Kit: JSON Explorer: Parse Nested JSON String",
+        "enablement": "config.contextKit.jsonExplorer.enabled"
       },
       {
         "command": "contextKit.jsonExplorer.convertToJsonInPlace",
-        "title": "Context Kit: JSON Explorer: Convert active document to JSON (Python dict or line-break repair)"
+        "title": "Context Kit: JSON Explorer: Convert active document to JSON (Python dict or line-break repair)",
+        "enablement": "config.contextKit.jsonExplorer.enabled"
       },
       {
         "command": "contextKit.copyAnchor.toggle",
-        "title": "Context Kit: Copy Anchor: 切换上下文复制"
+        "title": "Context Kit: Copy Anchor: 切换上下文复制",
+        "enablement": "config.contextKit.copyAnchor.enabled"
       },
       {
         "command": "contextKit.copyAnchor.copy",
-        "title": "Context Kit: Copy Anchor: 按当前模式复制"
+        "title": "Context Kit: Copy Anchor: 按当前模式复制",
+        "enablement": "config.contextKit.copyAnchor.enabled"
       }
     ],
     "keybindings": [
@@ -75,18 +80,18 @@
         "command": "contextKit.jsonExplorer.toggleCurrentDocument",
         "key": "ctrl+;",
         "mac": "cmd+;",
-        "when": "editorTextFocus && (editorLangId == json || editorLangId == jsonc || editorLangId == plaintext)"
+        "when": "config.contextKit.jsonExplorer.enabled && editorTextFocus && (editorLangId == json || editorLangId == jsonc || editorLangId == plaintext)"
       },
       {
         "command": "contextKit.copyAnchor.copy",
         "key": "ctrl+c",
         "mac": "cmd+c",
-        "when": "editorTextFocus && editorHasSelection"
+        "when": "config.contextKit.copyAnchor.enabled && editorTextFocus && editorHasSelection"
       },
       {
         "command": "contextKit.copyAnchor.toggle",
         "key": "ctrl+\\ ctrl+\\",
-        "when": "editorTextFocus"
+        "when": "config.contextKit.copyAnchor.enabled && editorTextFocus"
       }
     ],
     "configuration": {
@@ -122,7 +127,19 @@
           "type": "boolean",
           "default": true,
           "scope": "window",
-          "description": "开启时，编辑器内选中复制会附带路径与行号。快捷键和状态栏按钮修改此设置，并保留当前设置作用域。"
+          "description": "是否启用整个 Copy Anchor 功能。关闭后隐藏状态栏、停止复制快捷键和模式切换，并清空内存复制快照；不修改现有剪贴板。修改后即时生效。"
+        },
+        "contextKit.jsonExplorer.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "是否启用 JSON Explorer。关闭后停止自动格式化、Hover、CodeLens 和转换命令；修改后即时生效。"
+        },
+        "contextKit.copyAnchor.contextMode": {
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "description": "Copy Anchor 启用时是否使用上下文复制。true 为路径/行号复制，false 为普通复制；快捷键和状态栏切换此项，不改变功能总开关。"
         }
       }
     }

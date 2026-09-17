@@ -62,3 +62,9 @@ VSIX 包含 `out/extension.js` 与第三方许可，不包含源码、测试、s
 集成测试验证 JSON 转换后按新行号复制、全选复制切换回原文再进入 plaintext 自动格式化，以及 JSON Explorer 侧栏 Untitled 内容保持原生复制。CI 运行完整单测和官方 VS Code 扩展宿主测试。
 
 旧独立扩展应禁用，以避免重复的复制快捷键、状态栏、Hover 和粘贴处理。新设置命名空间不会自动继承旧设置，迁移方法见 README。
+
+## 模块总开关与配置文档
+
+两个模块的 `enabled` 都是整个功能的总开关，默认 true，动态生效。JSON Explorer 关闭时停止文档事件处理、转换命令并释放 provider；重新启用时重新注册。Copy Anchor 关闭时停用命令和快捷键、隐藏状态栏、取消提示定时器并清除快照。模式单独保存在 `contextKit.copyAnchor.contextMode`，关闭总开关不重置模式或现有剪贴板。
+
+配置与使用说明统一维护在各功能 README，docs 下的旧入口仅保留导航。当前无远端仓库，VSIX 保留相对文档链接并包含功能 README 和演示图片；发布到 Marketplace 前应配置真实 repository 地址并启用链接重写。

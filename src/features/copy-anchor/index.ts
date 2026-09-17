@@ -1,3 +1,4 @@
+import { isCopyAnchorEnabled } from './config';
 import * as vscode from 'vscode';
 import {
   captureSelection,
@@ -30,7 +31,7 @@ export function registerCopyAnchorFeature(
     copied.hide();
   };
   const showCopied = (result: CopyResult | undefined): void => {
-    if (!result) return;
+    if (!isCopyAnchorEnabled() || !result) return;
     hideCopied();
     const config = vscode.workspace.getConfiguration('contextKit.copyAnchor');
     const duration = config.get<number>('previewDuration', 1);
@@ -51,9 +52,15 @@ export function registerCopyAnchorFeature(
   status.name = 'Context Kit: Copy Anchor';
   status.command = 'contextKit.copyAnchor.toggle';
   const refresh = (): void => {
+    if (!isCopyAnchorEnabled()) {
+      status.hide();
+      hideCopied();
+      clearCopyHistory();
+      return;
+    }
     const enabled = vscode.workspace
       .getConfiguration('contextKit.copyAnchor')
-      .get<boolean>('enabled', true);
+      .get<boolean>('contextMode', true);
     status.text = enabled ? '📌' : '📄';
     const mode = enabled ? '上下文复制' : '普通复制';
     status.tooltip = `Copy Anchor：${mode}。点击或按 Ctrl+\\ Ctrl+\\ 切换并复制。未保存文件始终普通复制。`;
@@ -61,20 +68,25 @@ export function registerCopyAnchorFeature(
     status.show();
   };
   // Serialize toggles so two rapid invocations do not read the same old value.
+  let lifecycleVersion = 0;
   let toggleQueue: Promise<void> = Promise.resolve();
   const toggle = (): Promise<void> => {
+    if (!isCopyAnchorEnabled()) return Promise.resolve();
+    const version = lifecycleVersion;
     const content = captureSelection();
     toggleQueue = toggleQueue
       .then(async () => {
+        if (!isCopyAnchorEnabled() || version !== lifecycleVersion) return;
         const config = vscode.workspace.getConfiguration('contextKit.copyAnchor');
-        const inspected = config.inspect<boolean>('enabled');
+        const inspected = config.inspect<boolean>('contextMode');
         const target =
           inspected?.workspaceValue !== undefined
             ? vscode.ConfigurationTarget.Workspace
             : vscode.ConfigurationTarget.Global;
-        await config.update('enabled', !config.get<boolean>('enabled', true), target);
+        await config.update('contextMode', !config.get<boolean>('contextMode', true), target);
         refresh();
-        showCopied(await copyAfterToggle(content));
+        if (isCopyAnchorEnabled() && version === lifecycleVersion)
+          showCopied(await copyAfterToggle(content));
       })
       .catch(reportError);
     return toggleQueue;
@@ -89,7 +101,11 @@ export function registerCopyAnchorFeature(
       copyWithCurrentMode().then(showCopied).catch(reportError),
     ),
     vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration('contextKit.copyAnchor.enabled')) refresh();
+      if (event.affectsConfiguration('contextKit.copyAnchor.enabled')) {
+        lifecycleVersion++;
+        refresh();
+      }
+      if (event.affectsConfiguration('contextKit.copyAnchor.contextMode')) refresh();
       if (
         event.affectsConfiguration('contextKit.copyAnchor.previewDuration') ||
         event.affectsConfiguration('contextKit.copyAnchor.previewMaxLength')

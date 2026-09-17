@@ -2,6 +2,9 @@
 
 ## 0.1.0
 
+- 两个功能新增/统一 enabled 总开关；Copy Anchor 的复制模式改用 contextMode。
+- 配置集中到各功能 README，补全字段说明、完整 settings.json 示例与根文档导航。
+
 - 初始化 Context Kit，使用 Bun、TypeScript 7、Oxlint 和 Oxfmt。
 - 迁入 Better JSON Explorer：JSON/字符串转换、Python repr 与换行修复、自动识别、Hover、CodeLens 和侧栏解析。
 - 命令与设置统一使用 `contextKit.jsonExplorer.*`，默认 Ctrl+; / Cmd+; 保持不变。

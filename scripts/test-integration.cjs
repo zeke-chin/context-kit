@@ -7,6 +7,8 @@ runTests({
   extensionDevelopmentPath: path.resolve(__dirname, '..'),
   extensionTestsPath: path.resolve(__dirname, '../out/test/index.js'),
   launchArgs: [
+    // Native Wayland clipboard access depends on compositor focus. X11 also matches CI/Xvfb.
+    ...(process.platform === 'linux' ? ['--ozone-platform=x11'] : []),
     '--disable-extensions',
     '--disable-gpu',
     '--no-sandbox',

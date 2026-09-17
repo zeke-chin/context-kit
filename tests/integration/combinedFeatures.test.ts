@@ -14,13 +14,13 @@ suite('JSON Explorer and Copy Anchor together', () => {
     folder = await mkdtemp(join(tmpdir(), 'context-kit-combined-'));
     clipboard = await vscode.env.clipboard.readText();
     const config = vscode.workspace.getConfiguration('contextKit.copyAnchor');
-    originalMode = config.inspect<boolean>('enabled')?.globalValue;
-    await config.update('enabled', true, vscode.ConfigurationTarget.Global);
+    originalMode = config.inspect<boolean>('contextMode')?.globalValue;
+    await config.update('contextMode', true, vscode.ConfigurationTarget.Global);
   });
   suiteTeardown(async () => {
     await vscode.workspace
       .getConfiguration('contextKit.copyAnchor')
-      .update('enabled', originalMode, vscode.ConfigurationTarget.Global);
+      .update('contextMode', originalMode, vscode.ConfigurationTarget.Global);
     await vscode.env.clipboard.writeText(clipboard);
     await rm(folder, { recursive: true, force: true });
   });
@@ -66,6 +66,7 @@ suite('JSON Explorer and Copy Anchor together', () => {
   });
 
   test('JSON Explorer side-panel Untitled output copies without a source path', async () => {
+    await vscode.commands.executeCommand('workbench.action.joinAllGroups');
     const content = '{"parsed":true}';
     await vscode.commands.executeCommand(
       'contextKit.jsonExplorer.parseNestedJson',
@@ -73,9 +74,15 @@ suite('JSON Explorer and Copy Anchor together', () => {
       'combined',
       'json',
     );
-    const editor = vscode.window.activeTextEditor!;
-    assert.equal(editor.document.isUntitled, true);
-    await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+    const sideDocument = vscode.window.activeTextEditor!.document;
+    assert.equal(sideDocument.isUntitled, true);
+    // Native copy routes through renderer focus; isolate the opened document before selecting.
+    await vscode.commands.executeCommand('workbench.action.joinAllGroups');
+    const editor = await vscode.window.showTextDocument(sideDocument, {
+      viewColumn: vscode.ViewColumn.One,
+      preserveFocus: false,
+    });
+    await vscode.commands.executeCommand('workbench.action.focusFirstEditorGroup');
     const end = editor.document.lineAt(editor.document.lineCount - 1).range.end;
     editor.selection = new vscode.Selection(new vscode.Position(0, 0), end);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
