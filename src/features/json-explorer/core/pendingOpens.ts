@@ -36,7 +36,7 @@ export function stashPendingOpen(open: PendingOpen): string {
 
 export function takePendingOpen(token: string): PendingOpen | undefined {
   // Intentionally not deleted on read: the same hover link can be clicked more
-  // than once. The LRU bound in `stashPendingOpen` is what reclaims memory.
+  // than once. The FIFO bound in `stashPendingOpen` is what reclaims memory.
   return pendingOpens.get(token);
 }
 

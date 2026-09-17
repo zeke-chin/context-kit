@@ -18,3 +18,6 @@ tsconfig.tests.json
 !src/features/copy-anchor/README.md
 !src/features/json-explorer/README.md
 !docs/images/**
+
+CLAUDE.md
+AGENTS.md
