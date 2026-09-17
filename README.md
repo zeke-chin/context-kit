@@ -90,7 +90,17 @@ bun run package
 
 Bun 将 `jsonc-parser` 一起打入 `out/extension.js`，仅将 `vscode` 留给宿主提供；插件运行不需要安装 Bun。TS7 检查源代码和测试，测试配置单独跳过第三方声明文件检查。
 
-生成的 `context-kit-tools-0.1.0.vsix` 可在扩展面板选择「从 VSIX 安装」。项目仓库：[zeke-chin/context-kit](https://github.com/zeke-chin/context-kit)。架构说明见 `docs/architecture.md`。
+生成的 `context-kit-tools-0.1.1.vsix` 可在扩展面板选择「从 VSIX 安装」。项目仓库：[zeke-chin/context-kit](https://github.com/zeke-chin/context-kit)。架构说明见 `docs/architecture.md`。
+
+## 发布
+
+发布到 [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=zekeChin.context-kit-tools) 和 [Open VSX](https://open-vsx.org/extension/zekeChin/context-kit-tools)，扩展 ID 为 `zekeChin.context-kit-tools`，商店显示名称为 Context Kit Tools。
+
+1. 更新 `package.json` 的版本和 `CHANGELOG.md`，提交并推送 main，确认 CI 通过。
+2. 创建与版本一致的 `vX.Y.Z` 标签并推送。
+3. Release 工作流校验标签，执行完整检查和官方 VS Code 1.105.0 集成测试，打包一次，将同一份 VSIX 发布到两个市场，成功后创建 GitHub Release。
+
+仓库 Actions Secrets 需要 `VSCE_PAT` 和 `OVSX_PAT`。令牌只用于对应发布步骤；本地 `.env` 不提交、不打包。发布中途失败可以重跑工作流，已发布的同版本会跳过。main 和 PR 的 CI 只测试、打包，不发布。
 
 ## License
 

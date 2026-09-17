@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1
+
+- 新增标签触发的自动发布：校验版本、完整检查、官方 VS Code 集成测试、打包、发布到两个市场并创建 GitHub Release。
+- 为 Linux CI 的原生复制测试补充窗口激活与真实输入，保留实际剪贴板断言。
+- 两个市场统一显示名称 Context Kit Tools，包名为 context-kit-tools。
+- 补充发布说明，令牌仅在发布步骤使用，本地环境变量文件排除出 Git 与 VSIX。
+
 ## 0.1.0
 
 - 两个功能新增/统一 enabled 总开关；Copy Anchor 的复制模式改用 contextMode。

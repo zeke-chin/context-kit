@@ -1,7 +1,7 @@
 {
   "name": "context-kit-tools",
   "displayName": "Context Kit Tools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "整理结构化内容，复制精准上下文。",
   "categories": [
     "Other"

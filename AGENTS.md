@@ -22,7 +22,7 @@ bun test -t 'unwraps single-level object'             # 按测试名过滤
 bun run test:integration     # compile + 单独 bundle 测试 + @vscode/test-electron
 xvfb-run -a bun run test:integration                  # 无桌面 Linux
 VSCODE_EXECUTABLE_PATH=/path/to/code bun run test:integration
-bun run package              # 生成 context-kit-tools-0.1.0.vsix
+bun run package              # 生成 context-kit-tools-0.1.1.vsix
 ```
 
 按 F5 启动扩展开发宿主（preLaunchTask 为 `bun: compile`）。工具链：Bun 1.4.2、TypeScript 7.0.2、Oxlint、Oxfmt；开发环境要求 Node.js 22.12+，用于打包和扩展宿主测试工具，扩展运行不需要 Bun。
@@ -66,3 +66,5 @@ src/shared/logger.ts         共用 LogOutputChannel
 - `VSCODE_EXECUTABLE_PATH` 指向的兼容编辑器只能作本地替代，不能据此声称通过官方最低版本验证。
 
 发布相关：仓库为 `zeke-chin/context-kit`，打包使用 `--no-dependencies` 并启用相对链接重写。发布前必须确认版本、检查结果及 VSIX 内容；`.env` 和 `.env.*` 不得进入 Git 或 VSIX。
+
+发布流程维护在 `.github/workflows/release.yml`：仅版本标签触发，标签必须匹配 package.json，检查和官方宿主测试通过后将同一 VSIX 发布到两市场。令牌只传给对应发布步骤。
