@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import * as vscode from 'vscode';
 
@@ -10,4 +11,21 @@ export async function assertClipboard(expected: string): Promise<void> {
     actual = await vscode.env.clipboard.readText();
   }
   assert.equal(actual, expected);
+}
+
+/** Native DOM copy needs an active OS window, not just an active editor group. */
+export async function focusClipboardEditor(): Promise<void> {
+  if (process.env.CI && process.platform === 'linux') {
+    const windows = execFileSync('xdotool', ['search', '--onlyvisible', '--class', 'Code'], {
+      encoding: 'utf8',
+    })
+      .trim()
+      .split('\n');
+    const windowId = windows.at(-1);
+    if (!windowId) throw new Error('No visible VS Code test window');
+    execFileSync('xdotool', ['windowactivate', '--sync', windowId]);
+  }
+  await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  console.log('Native clipboard window focused:', vscode.window.state.focused);
 }

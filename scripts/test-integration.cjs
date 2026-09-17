@@ -9,6 +9,7 @@ runTests({
   launchArgs: [
     // Native Wayland clipboard access depends on compositor focus. X11 also matches CI/Xvfb.
     ...(process.platform === 'linux' ? ['--ozone-platform=x11'] : []),
+    ...(process.env.CI ? ['--log', 'trace'] : []),
     '--disable-extensions',
     '--disable-gpu',
     '--no-sandbox',

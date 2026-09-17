@@ -1,4 +1,4 @@
-import { assertClipboard } from './clipboard';
+import { assertClipboard, focusClipboardEditor } from './clipboard';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -83,7 +83,7 @@ suite('JSON Explorer and Copy Anchor together', () => {
       viewColumn: vscode.ViewColumn.One,
       preserveFocus: false,
     });
-    await vscode.commands.executeCommand('workbench.action.focusFirstEditorGroup');
+    await focusClipboardEditor();
     const end = editor.document.lineAt(editor.document.lineCount - 1).range.end;
     editor.selection = new vscode.Selection(new vscode.Position(0, 0), end);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');

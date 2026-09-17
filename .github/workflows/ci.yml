@@ -20,7 +20,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run check
       - name: Install window manager for native clipboard tests
-        run: sudo apt-get update && sudo apt-get install -y openbox
+        run: sudo apt-get update && sudo apt-get install -y openbox xdotool
       - name: Integration tests with a focused X11 window
         run: xvfb-run -a sh -c 'openbox >/tmp/openbox.log 2>&1 & bun run test:integration'
       - run: bun run package
@@ -28,3 +28,11 @@ jobs:
         with:
           name: context-kit-vsix
           path: '*.vsix'
+
+      - name: Upload integration diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs
+          path: .vscode-test/**/logs/**
+          include-hidden-files: true

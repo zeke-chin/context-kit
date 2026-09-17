@@ -1,4 +1,4 @@
-import { assertClipboard } from './clipboard';
+import { assertClipboard, focusClipboardEditor } from './clipboard';
 import { suite, test } from 'mocha';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -96,7 +96,7 @@ async function runCopyAnchorRegression(): Promise<void> {
       selectionChange.dispose();
     }
 
-    await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+    await focusClipboardEditor();
     editor.selection = new vscode.Selection(2, 2, 2, 2);
     equal(contextForEditor(editor), undefined);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
@@ -104,7 +104,7 @@ async function runCopyAnchorRegression(): Promise<void> {
 
     const untitled = await vscode.workspace.openTextDocument({ content: 'Untitled text\n' });
     const unsaved = await vscode.window.showTextDocument(untitled);
-    await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+    await focusClipboardEditor();
     unsaved.selection = new vscode.Selection(0, 0, 1, 0);
     equal(contextForEditor(unsaved), undefined);
     await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
