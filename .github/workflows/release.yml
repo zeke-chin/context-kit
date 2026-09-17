@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Verify tag and select package
+        id: package
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const { name, version } = JSON.parse(readFileSync('package.json', 'utf8'));
+          if (process.env.GITHUB_REF_NAME !== `v${version}`) throw new Error('Tag does not match package.json version');
+          appendFileSync(process.env.GITHUB_OUTPUT, `vsix=${name}-${version}.vsix\n`);
+          JS
+      - run: bun install --frozen-lockfile
+      - run: bun run check
+      - name: Install window manager for native clipboard tests
+        run: sudo apt-get update && sudo apt-get install -y openbox
+      - name: Integration tests with a focused X11 window
+        run: xvfb-run -a sh -c 'openbox >/tmp/openbox.log 2>&1 & bun run test:integration'
+      - run: bun run package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-vsix
+          path: ${{ steps.package.outputs.vsix }}
+          if-no-files-found: error
+      - name: Verify publishing credentials are configured
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: test -n "$VSCE_PAT" && test -n "$OVSX_PAT"
+      - name: Publish to VS Code Marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          VSIX: ${{ steps.package.outputs.vsix }}
+        run: bun run vsce publish --packagePath "$VSIX" --skip-duplicate
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+          VSIX: ${{ steps.package.outputs.vsix }}
+        run: bun run ovsx publish "$VSIX" --skip-duplicate
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VSIX: ${{ steps.package.outputs.vsix }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$VSIX" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "$VSIX" --verify-tag --generate-notes --title "Context Kit Tools ${GITHUB_REF_NAME#v}"
+          fi

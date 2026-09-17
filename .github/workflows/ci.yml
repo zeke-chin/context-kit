@@ -1,5 +1,9 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 permissions:
   contents: read
 jobs:
@@ -15,7 +19,10 @@ jobs:
           bun-version: '1.4.2'
       - run: bun install --frozen-lockfile
       - run: bun run check
-      - run: xvfb-run -a bun run test:integration
+      - name: Install window manager for native clipboard tests
+        run: sudo apt-get update && sudo apt-get install -y openbox
+      - name: Integration tests with a focused X11 window
+        run: xvfb-run -a sh -c 'openbox >/tmp/openbox.log 2>&1 & bun run test:integration'
       - run: bun run package
       - uses: actions/upload-artifact@v4
         with:
