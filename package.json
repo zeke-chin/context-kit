@@ -1,0 +1,53 @@
+{
+  "name": "context-kit",
+  "displayName": "Context Kit",
+  "version": "0.1.0",
+  "description": "整理结构化内容，复制精准上下文。",
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "clipboard",
+    "context",
+    "json"
+  ],
+  "license": "MIT",
+  "author": "zeke-chin",
+  "publisher": "zekeChin",
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc --watch -p .",
+    "typecheck": "tsc --noEmit -p .",
+    "lint": "oxlint --deny-warnings src tests",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "bun test --pass-with-no-tests ./tests/unit",
+    "check": "bun run typecheck && bun run lint && bun run format:check && bun run test",
+    "package": "bun run compile && vsce package --no-dependencies --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.3",
+    "@types/vscode": "1.105.0",
+    "@vscode/vsce": "3.9.2",
+    "oxfmt": "0.68.0",
+    "oxlint": "1.83.0",
+    "typescript": "7.0.2"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "contextKit.showOutput",
+        "title": "Context Kit: 显示日志"
+      }
+    ]
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "packageManager": "bun@1.4.2"
+}
