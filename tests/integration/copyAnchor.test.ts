@@ -1,4 +1,4 @@
-import { assertClipboard, focusClipboardEditor } from './clipboard';
+import { assertClipboard, focusClipboardEditor, copyWithoutSelection } from './clipboard';
 import { suite, test } from 'mocha';
 import assert from 'node:assert/strict';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -99,7 +99,8 @@ async function runCopyAnchorRegression(): Promise<void> {
     await focusClipboardEditor();
     editor.selection = new vscode.Selection(2, 2, 2, 2);
     equal(contextForEditor(editor), undefined);
-    await vscode.commands.executeCommand('contextKit.copyAnchor.copy');
+    // No selection: the extension keybinding must leave Ctrl+C to VS Code.
+    await copyWithoutSelection();
     await assertClipboard('  alpha\n');
 
     const untitled = await vscode.workspace.openTextDocument({ content: 'Untitled text\n' });

@@ -33,3 +33,12 @@ export async function focusClipboardEditor(): Promise<void> {
     execFileSync('xdotool', ['key', '--clearmodifiers', 'F18']);
   }
 }
+
+/** With no selection the contributed Ctrl+C binding is inactive; exercise native fallthrough. */
+export async function copyWithoutSelection(): Promise<void> {
+  if (process.env.CI && process.platform === 'linux') {
+    execFileSync('xdotool', ['key', '--clearmodifiers', 'ctrl+c']);
+  } else {
+    await vscode.commands.executeCommand('editor.action.clipboardCopyAction');
+  }
+}
