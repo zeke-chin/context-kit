@@ -17,20 +17,28 @@
   "publisher": "zekeChin",
   "main": "./out/extension.js",
   "scripts": {
-    "compile": "tsc -p .",
-    "watch": "tsc --watch -p .",
-    "typecheck": "tsc --noEmit -p .",
-    "lint": "oxlint --deny-warnings src tests",
+    "compile": "bun run typecheck && bun build ./src/extension.ts --target node --format cjs --external vscode --outdir out --sourcemap=external",
+    "watch": "bun build ./src/extension.ts --target node --format cjs --external vscode --outdir out --sourcemap=external --watch",
+    "typecheck": "tsc --noEmit -p . && tsc -p tsconfig.tests.json",
+    "lint": "oxlint --deny-warnings src tests scripts",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "test": "bun test --pass-with-no-tests ./tests/unit",
+    "test": "bun test ./tests/unit",
     "check": "bun run typecheck && bun run lint && bun run format:check && bun run test",
-    "package": "bun run compile && vsce package --no-dependencies --allow-missing-repository"
+    "package": "bun run compile && vsce package --no-dependencies --allow-missing-repository",
+    "test:integration": "bun run compile && bun scripts/build-integration.mts && node scripts/test-integration.cjs"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
+    "@types/bun": "1.4.2",
+    "@types/mocha": "^10.0.10",
     "@types/node": "22.20.3",
     "@types/vscode": "1.105.0",
+    "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "3.9.2",
+    "mocha": "^11.0.0",
     "oxfmt": "0.68.0",
     "oxlint": "1.83.0",
     "typescript": "7.0.2"
@@ -40,9 +48,49 @@
       {
         "command": "contextKit.showOutput",
         "title": "Context Kit: 显示日志"
+      },
+      {
+        "command": "contextKit.jsonExplorer.toggleCurrentDocument",
+        "title": "Context Kit: JSON Explorer: Toggle Current Document JSON Format/String"
+      },
+      {
+        "command": "contextKit.jsonExplorer.parseNestedJson",
+        "title": "Context Kit: JSON Explorer: Parse Nested JSON String"
+      },
+      {
+        "command": "contextKit.jsonExplorer.convertToJsonInPlace",
+        "title": "Context Kit: JSON Explorer: Convert active document to JSON (Python dict or line-break repair)"
       }
-    ]
+    ],
+    "keybindings": [
+      {
+        "command": "contextKit.jsonExplorer.toggleCurrentDocument",
+        "key": "ctrl+;",
+        "mac": "cmd+;",
+        "when": "editorTextFocus && (editorLangId == json || editorLangId == jsonc || editorLangId == plaintext)"
+      }
+    ],
+    "configuration": {
+      "title": "Context Kit: JSON Explorer",
+      "properties": {
+        "contextKit.jsonExplorer.pythonRepr.autoConvert": {
+          "type": "boolean",
+          "default": false,
+          "description": "粘贴 Python repr 字典内容时是否直接转换为 JSON。默认 false：在顶部显示 ▸ Convert 按钮，点击后才转换。设为 true 时粘贴即转换，且不再显示按钮。"
+        },
+        "contextKit.jsonExplorer.lineBreakRepair.autoConvert": {
+          "type": "boolean",
+          "default": false,
+          "description": "粘贴包含字符串内真换行（如从终端复制的 JSON）时是否直接修复并转换为 JSON。默认 false：在顶部显示 ▸ Convert 按钮，点击后才转换。设为 true 时粘贴即转换，且不再显示按钮。"
+        }
+      }
+    }
   },
+  "activationEvents": [
+    "onLanguage:json",
+    "onLanguage:jsonc",
+    "onLanguage:plaintext"
+  ],
   "extensionKind": [
     "workspace"
   ],

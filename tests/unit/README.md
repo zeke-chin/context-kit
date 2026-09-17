@@ -1,5 +1,5 @@
 # 单元测试
 
-后续按 `json-explorer/` 和 `copy-anchor/` 分组，使用 Bun 内置测试框架测试各模块的纯逻辑。
+运行 `bun run test`，执行 `json-explorer/` 下的纯逻辑回归测试。
 
-当前没有业务代码迁入，因此没有单元测试；`bun run test` 允许空测试目录通过，不代表业务验证已完成。
+原项目 6 个测试文件完整迁入，覆盖 JSON 格式化、嵌套解析、Python repr、字符串内换行修复、Markdown 判断、围栏闭合及 Hover token 缓存。只改测试运行器和模块引用，保留原断言。

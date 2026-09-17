@@ -14,7 +14,7 @@
     },
     {
       "type": "shell",
-      "problemMatcher": "$tsc-watch",
+      "problemMatcher": [],
       "isBackground": true,
       "label": "bun: watch",
       "command": "bun",

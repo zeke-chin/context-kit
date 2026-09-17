@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { createLogger } from './shared/logger';
+import { registerJsonExplorerFeature } from './features/json-explorer';
 
 export function activate(context: vscode.ExtensionContext): void {
   const logger = createLogger();
@@ -7,5 +8,6 @@ export function activate(context: vscode.ExtensionContext): void {
     logger,
     vscode.commands.registerCommand('contextKit.showOutput', () => logger.show()),
   );
-  logger.info('Context Kit activated. Feature migration is pending.');
+  registerJsonExplorerFeature(context, logger);
+  logger.info('Context Kit activated.');
 }

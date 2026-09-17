@@ -11,3 +11,6 @@ tsconfig.json
 .gitignore
 bun.lock
 *.vsix
+scripts/**
+out/test/**
+tsconfig.tests.json

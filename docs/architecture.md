@@ -1,44 +1,49 @@
-# 架构与迁移计划
+# 架构与迁移记录
 
 ## 工程形式
 
-使用一个 Git 仓库、一个 VS Code 扩展、一个 package.json。两个功能模块暂时无需拆成 workspace 包；它们共享发布周期和扩展宿主。
+一个 Git 仓库、一个 VS Code 扩展、一个 package.json。功能按模块划分，共享发布周期和扩展宿主，暂不拆 workspace 包。
 
 ## 模块边界
 
-- `extension.ts` 只负责创建共用服务、调用功能注册入口和管理生命周期，不承载业务算法。
-- 每个功能在 `src/features/<name>/index.ts` 提供自己的注册入口。功能迁移前不创建空注册函数。
-- 功能内部的 `core/` 保持纯 TypeScript，不导入 `vscode`。选区、剪贴板、设置和 provider 等 API 交互由外层负责。
-- JSON 模块和 Copy Anchor 模块不互相导入。只有真正共用且语义一致的能力才放进 `shared/`，不提前抽象插件框架或依赖注入容器。
-- 命令、监听器、输出通道和状态栏都应登记到 `context.subscriptions`。
+- `extension.ts` 创建共用日志，调用 `registerJsonExplorerFeature(context, logger)`，管理顶层生命周期。
+- JSON Explorer 在 `src/features/json-explorer/` 内实现；Copy Anchor 保留独立模块目录，待后续迁移。
+- `core/` 不导入 `vscode`，保留纯解析、文本处理和内存 token 缓存，使用 Bun 测试。
+- `documentValues.ts` 把 offset/length 适配为 VS Code Range；命令、事件和 provider 负责宿主 API。
+- 功能模块不互相导入；只有真正共用且语义一致的能力进入 `shared/`。
+- 所有命令、监听器、输出通道和状态栏都登记到 `context.subscriptions`。转换 CodeLens 的实例也单独释放，清理自身配置监听器与 EventEmitter。
 
-## 命名规划
+## 命名
 
-| 内容         | 约定                      |
-| ------------ | ------------------------- |
-| 展示名称     | Context Kit               |
-| 包名与仓库名 | context-kit               |
-| 命令前缀     | contextKit                |
-| JSON 命令    | contextKit.jsonExplorer.* |
-| 复制命令     | contextKit.copyAnchor.*   |
-| JSON 配置    | contextKit.jsonExplorer.* |
-| 复制配置     | contextKit.copyAnchor.*   |
+| 内容                   | 约定                      |
+| ---------------------- | ------------------------- |
+| 展示名称               | Context Kit               |
+| 包名与仓库名           | context-kit               |
+| JSON 命令及配置        | contextKit.jsonExplorer.* |
+| 复制命令及配置（预留） | contextKit.copyAnchor.*   |
 
-仅 `contextKit.showOutput` 已注册。其他命令、配置和快捷键在对应功能迁入时再写入 package.json，避免展示无实现的功能。
+旧命令 `better-json-explorer.*` 和旧设置 `betterJsonExplorer.*` 不再注册。默认快捷键沿用 Ctrl+; / Cmd+;。没有自动改写用户设置；迁移前缀的方法在 README 中说明。
 
-## 迁移顺序
+## 已完成的 JSON Explorer 迁移
 
-1. **Copy Anchor**：先迁入格式化纯函数及测试，再接入复制命令、设置与状态栏。确认全选、Untitled、多选区、原生复制回退和快捷键冲突行为。
-2. **JSON 核心**：迁入解析、格式化、输入修复及现有回归测试，再接入编辑器命令。
-3. **JSON 交互**：迁入 Hover、CodeLens、自动识别与事件处理，保证监听器不会互相触发或重复注册。
-4. **整体验证**：添加扩展宿主测试，验证两个功能共同启用时的复制、粘贴、撤销和配置行为，完成文档及发布信息。
+来源：Better JSON Explorer 0.2.1，提交 `9fdeeb79fa406721cad9acde2a9a72cf57bedb01`。
 
-旧项目暂时保留。新命名空间不会自动继承旧设置，是否迁移配置应在功能迁入时明确决定。安装新旧扩展并行运行可能产生快捷键、provider 或自动转换重复，届时需说明替换方式。
+- JSON/字符串转换、Python repr 子集解析、字符串内换行修复。
+- plaintext 整体粘贴识别与格式化锁，保留原有触发规则与默认配置。
+- Hover 多种内容预览、2000 字符截断、短 token 打开完整内容。
+- 嵌套解析与转换 CodeLens，文档版本缓存和配置变化失效。
+- 侧栏新建文档、重复打开唯一命名、原有全部回归测试与功能文档。
 
-## 构建与打包
+适配调整：剥离纯逻辑的 VS Code 引用、使用共用日志通道、命令返回完成 Promise、补全 provider 释放。未修改 JSON/Python 格式转换算法或添加 Copy Anchor 行为。
 
-当前 TS7 将 `src/` 编译到 `out/`，保留 source map 用于 F5 调试。VSIX 不包含源码、测试、锁文件或开发配置。
+## 构建与验证
 
-骨架无运行时第三方依赖，暂用 `vsce package --no-dependencies`。迁入 `jsonc-parser` 等运行时依赖时，必须同步调整打包策略：优先增加 Bun bundle，将运行时依赖打进产物并 externalize `vscode`，TS7 继续负责类型检查。不能仅添加依赖而沿用排除依赖的未打包产物。
+TS7 负责类型检查，Bun 输出 Node 目标的 CommonJS bundle 和外部 source map。`jsonc-parser` 使用其 ESM 入口以便 Bun 静态收集内部依赖；默认 UMD 入口会留下无法打包的相对 require。`vscode` external，由扩展宿主提供。
 
-单元测试使用 Bun，只覆盖纯逻辑。VS Code API 集成测试单独使用真实扩展宿主，不通过大量 mock 代替。
+VSIX 包含 `out/extension.js` 与第三方许可，不包含源码、测试、source map、开发依赖或锁文件。F5 调试使用 bundle 的 source map。watch 仅重建 bundle，类型检查通过 `bun run typecheck` 或 `bun run check` 执行。
+
+单测在 Bun 中运行；集成测试将测试代码单独 bundle，使用 Mocha 和真实 VS Code API。CI 在官方 VS Code 1.105.0 上运行扩展宿主测试。兼容编辑器可通过环境变量作为本地替代，但不能据此声称完成官方最低版本验证。
+
+## 后续
+
+迁入 Copy Anchor 的核心、命令、设置和状态栏，再验证两个模块共同启用的复制、粘贴、撤销及配置行为。旧项目保留，避免同时启用旧 JSON 扩展导致行为重复。
