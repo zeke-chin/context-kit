@@ -36,6 +36,8 @@ export async function focusClipboardEditor(): Promise<void> {
 
 /** With no selection the contributed Ctrl+C binding is inactive; exercise native fallthrough. */
 export async function copyWithoutSelection(): Promise<void> {
+  // Flush the extension-host selection update before sending an OS key event.
+  await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
   if (process.env.CI && process.platform === 'linux') {
     execFileSync('xdotool', ['key', '--clearmodifiers', 'ctrl+c']);
   } else {
